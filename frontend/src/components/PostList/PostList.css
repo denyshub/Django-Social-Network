@@ -1,0 +1,97 @@
+.posts-container {
+  width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post {
+  width: 100%;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+
+
+.post-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+}
+
+.post-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.post-author-username {
+  font-weight: bold;
+}
+
+
+.post-image {
+  width: 100%; /* Заповнює всю ширину */
+  height: auto; /* Автоматична висота */
+  object-fit: cover; /* Зберігає пропорції, заповнює контейнер */
+}
+
+
+.post-info {
+  padding: 10px;
+}
+
+.post-caption {
+  margin: 10px 0;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-action-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.post-likes, .post-comments {
+  color: gray;
+  cursor: pointer;
+}
+
+.comments {
+  margin-top: 10px;
+  border-top: 1px solid #e6e6e6;
+  padding-top: 10px;
+}
+
+.comment {
+  margin: 5px 0;
+}
