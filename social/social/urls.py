@@ -5,6 +5,7 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
+from chats.views import ChatViewSet, MessageViewSet
 from posts.serializers import LikesSerializer
 from posts.views import *
 from users.views import UserRegistrationView, ProfileViewSet
@@ -15,6 +16,8 @@ router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"profiles", ProfileViewSet, basename="profiles")
 router.register(r"likes", LikesViewSet, basename="likes")
+router.register(r"chats", ChatViewSet, basename="chats")
+router.register(r"messages", MessageViewSet, basename="messages")
 
 
 urlpatterns = [

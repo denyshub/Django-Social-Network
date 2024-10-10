@@ -7,6 +7,7 @@ from posts.models import Post, Tag, Comment, Like
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     author_name = serializers.CharField(source="author.username", read_only=True)
+
     class Meta:
         model = Comment
         fields = "__all__"
@@ -15,6 +16,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     author_name = serializers.CharField(source="author.username", read_only=True)
+    author_id = serializers.CharField(source="author.id", read_only=True)
     author_profile_picture = serializers.ImageField(
         source="author.profile.profile_picture", read_only=True
     )
@@ -40,7 +42,6 @@ class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = "__all__"
-
 
 
 class LikesSerializer(serializers.ModelSerializer):

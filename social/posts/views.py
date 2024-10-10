@@ -76,12 +76,12 @@ class PostViewSet(viewsets.ModelViewSet):
     search = django_filters.CharFilter(field_name="text", lookup_expr="icontains")
     tag = django_filters.CharFilter(field_name="tags__name", lookup_expr="iexact")
     serializer_class = PostSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         pk = self.kwargs.get("pk")
         if not pk:
-            return Post.objects.prefetch_related('comments').all()
+            return Post.objects.prefetch_related("comments").all()
         return Post.objects.filter(pk=pk)
 
     def perform_create(self, serializer):

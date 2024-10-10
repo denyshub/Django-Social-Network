@@ -29,4 +29,3 @@ class TagAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "post", "text", "author")
     readonly_fields = ("id", "author")
-

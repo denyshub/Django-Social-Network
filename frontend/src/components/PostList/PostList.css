@@ -75,6 +75,12 @@ h1 {
   align-items: center;
 }
 
+.likes-container{
+  display: flex;
+  align-items: center;
+  gap: 10px
+}
+
 .post-action-button {
   background: none;
   border: none;
@@ -92,6 +98,6 @@ h1 {
   padding-top: 10px;
 }
 
-.comment {
-  margin: 5px 0;
+.liked {
+  fill: black;
 }

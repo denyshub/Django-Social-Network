@@ -9,6 +9,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isOwner, setIsOwner] = useState(false); // Новий стан для перевірки власника профілю
   const [formData, setFormData] = useState({
     bio: '',
     location: '',
@@ -49,6 +50,10 @@ const Profile = () => {
       const data = await response.json();
       setProfile(data);
       setPosts(data.posts || []);
+
+      // Перевірка, чи поточний користувач є власником профілю
+      setIsOwner(data.profile.user_id === parseInt(user_id, 10)); 
+
       setFormData({
         bio: data.profile?.bio || '',
         location: data.profile?.location || '',
@@ -96,36 +101,34 @@ const Profile = () => {
     const formData = new FormData();
     formData.append('text', newPost.text);
     if (newPost.image) {
-        formData.append('image', newPost.image);
+      formData.append('image', newPost.image);
     }
     formData.append('location', newPost.location);
-    formData.append('is_published', newPost.is_published); // Додайте це
+    formData.append('is_published', newPost.is_published);
     const tagsArray = newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
     tagsArray.forEach(tag => formData.append('tags', tag));
 
     try {
-        const response = await fetch(`http://localhost:8000/api/v1/posts/`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: formData,
-        });
+      const response = await fetch(`http://localhost:8000/api/v1/posts/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: formData,
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Failed to create post');
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to create post');
+      }
 
-        const newPostData = await response.json();
-        setPosts((prev) => [newPostData, ...prev]);
-        setNewPost({ text: '', image: null, location: '', tags: '', is_published: false }); // Скидаємо чекбокс
+      const newPostData = await response.json();
+      setPosts((prev) => [newPostData, ...prev]);
+      setNewPost({ text: '', image: null, location: '', tags: '', is_published: false });
     } catch (err) {
-        setError(err.message);
+      setError(err.message);
     }
-};
-
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -177,7 +180,7 @@ const Profile = () => {
             )}
             <p><strong>Name:</strong> {profile.profile.name}</p>
             <p><strong>Email:</strong> {profile.profile.email}</p>
-            {isEditing ? (
+            {isEditing && isOwner ? (  // Дозволяємо редагування лише власнику
               <form onSubmit={handleSubmit}>
                 <textarea
                   name="bio"
@@ -205,8 +208,8 @@ const Profile = () => {
                   value={formData.date_of_birth}
                   onChange={handleChange}
                 />
-                <button type="submit">Save</button>
-                <button type="button" onClick={handleCancel}>Cancel</button>
+                <button className='profile-button' type="submit">Save</button>
+                <button className='profile-button' type="button" onClick={handleCancel}>Cancel</button>
               </form>
             ) : (
               <>
@@ -214,40 +217,44 @@ const Profile = () => {
                 <p><strong>Location:</strong> {profile.profile.location}</p>
                 <p><strong>Website:</strong> {profile.profile.website ? <a href={profile.profile.website} target="_blank" rel="noopener noreferrer">{profile.profile.website}</a> : 'N/A'}</p>
                 <p><strong>Date of Birth:</strong> {profile.profile.date_of_birth || 'N/A'}</p>
-                <button onClick={handleEditToggle}>Edit Profile</button>
+                {isOwner && <button onClick={handleEditToggle}>Edit Profile</button>}  {/* Кнопка редагування лише для власника */}
               </>
             )}
           </div>
 
-          <h3>Create Post</h3>
-          <form onSubmit={handlePostSubmit}>
-            <textarea
-              name="text"
-              value={newPost.text}
-              onChange={handlePostChange}
-              placeholder="Write your post..."
-            />
-            <input
-              type="file"
-              onChange={handleImageChange}
-              accept="image/*"
-            />
-            <input
-              type="text"
-              name="location"
-              value={newPost.location}
-              onChange={handlePostChange}
-              placeholder="Location"
-            />
-            <input
-              type="text"
-              name="tags"
-              value={newPost.tags}
-              onChange={handlePostChange}
-              placeholder="Tags (comma-separated)"
-            />
-            <button type="submit">Create Post</button>
-          </form>
+          {isOwner && ( // Дозволяємо створення постів лише власнику
+            <>
+              <h3>Create Post</h3>
+              <form onSubmit={handlePostSubmit}>
+                <textarea
+                  name="text"
+                  value={newPost.text}
+                  onChange={handlePostChange}
+                  placeholder="Write your post..."
+                />
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                />
+                <input
+                  type="text"
+                  name="location"
+                  value={newPost.location}
+                  onChange={handlePostChange}
+                  placeholder="Location"
+                />
+                <input
+                  type="text"
+                  name="tags"
+                  value={newPost.tags}
+                  onChange={handlePostChange}
+                  placeholder="Tags (comma-separated)"
+                />
+                <button className='profile-button' type="submit">Create Post</button>
+              </form>
+            </>
+          )}
 
           <h3>Posts</h3>
           <ul className="post-list">
@@ -256,16 +263,15 @@ const Profile = () => {
                 <li key={post.id}>
                   <p>{post.text}</p>
                   {post.image && <img src={post.image} alt="Post" />}
-                  <p><strong>Tags:</strong> {Array.isArray(post.tags) ? post.tags.join(', ') : post.tags}</p>
                 </li>
               ))
             ) : (
-              <li>No posts available.</li>
+              <li>No posts yet.</li>
             )}
           </ul>
         </>
       ) : (
-        <div>Loading profile data...</div>
+        <div>No profile found.</div>
       )}
     </div>
   );

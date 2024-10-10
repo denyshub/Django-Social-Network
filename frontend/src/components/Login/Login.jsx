@@ -39,7 +39,7 @@
         localStorage.setItem('user_id', userResponse.data[0].id); 
         console.log('User ID:', userResponse.data[0].id);
     
-        navigate('/posts'); // Використовуємо navigate для перенаправлення після входу
+        navigate('/'); // Використовуємо navigate для перенаправлення після входу
       } catch (err) {
         setError('Invalid credentials');
         console.error(err);

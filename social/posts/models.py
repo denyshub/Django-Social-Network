@@ -4,6 +4,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from transliterate import translit
 
+
 class Post(models.Model):
     image = models.ImageField(
         "Зображення", upload_to="post_images/", null=True, blank=True
@@ -15,7 +16,7 @@ class Post(models.Model):
         validators=[
             MinLengthValidator(1),  # Мінімальна довжина 10 символів
             MaxLengthValidator(5000),  # Максимальна довжина 5000 символів
-        ]
+        ],
     )
     author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True)
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
@@ -26,7 +27,7 @@ class Post(models.Model):
         blank=True,
         validators=[
             MaxLengthValidator(255),  # Максимальна довжина 255 символів
-        ]
+        ],
     )
     tags = models.ManyToManyField("Tag", related_name="posts")
     likes_num = models.IntegerField("К-ть лайків", default=0)
@@ -36,7 +37,7 @@ class Post(models.Model):
         db_table = "posts_post"
 
     def __str__(self):
-        return self.text or 'Без тексту'
+        return self.text or "Без тексту"
 
 
 class Tag(models.Model):
@@ -63,11 +64,10 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     text = models.TextField(
         "Текст",
-
         validators=[
             MinLengthValidator(1),  # Мінімальна довжина 1 символ
             MaxLengthValidator(1000),  # Максимальна довжина 1000 символів
-        ]
+        ],
     )
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
     is_edited = models.BooleanField(default=False)  # Змінено за замовчуванням на False
@@ -81,11 +81,7 @@ class Like(models.Model):
         null=True,
         default=None,
     )
-    post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name="likes"
-    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

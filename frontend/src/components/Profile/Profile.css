@@ -39,7 +39,7 @@ textarea, input[type="text"], input[type="url"], input[type="date"] {
   font-size: 14px;
 }
 
-button {
+.profile-button {
   background-color: #007bff;
   margin-left: 10px;
   color: white;
@@ -50,7 +50,7 @@ button {
   font-size: 16px;
 }
 
-button:hover {
+.profile-button :hover {
   background-color: #0056b3;
 }
 

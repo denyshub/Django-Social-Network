@@ -47,8 +47,7 @@ const Header = () => {
             <a href="/">MyApp</a>
           </div>
           <ul className="nav-list">
-            <li><a href="/">Home</a></li>
-            <li><a href="/posts">Posts</a></li>
+            <li><a href="/">Posts</a></li>
             {isLoggedIn && <li><a href="#" onClick={handleProfileClick}>Profile</a></li>}
           </ul>
           <div className="dropdown">

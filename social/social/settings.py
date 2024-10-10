@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "posts",
     "users",
+    "chats",
     "django_filters",
 ]
 
