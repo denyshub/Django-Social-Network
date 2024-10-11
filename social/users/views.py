@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 
 from rest_framework import status, viewsets, generics
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Post
@@ -23,39 +23,54 @@ class UserRegistrationView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Create your views here.
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     filter_backends = (DjangoFilterBackend,)
-
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Додано для вимоги аутентифікації
 
     def get_object(self):
         pk = self.kwargs.get("pk")  # Отримуємо pk з URL
 
-        # Перевіряємо, чи передано pk
         if pk:
             try:
                 # Пошук профілю за pk
-                profile = Profile.objects.get(pk=pk)
+                return Profile.objects.get(pk=pk)
             except Profile.DoesNotExist:
                 raise NotFound("Profile not found.")
         else:
             # Якщо pk не передано, шукаємо профіль поточного користувача
             user = self.request.user
             profile, created = Profile.objects.get_or_create(user=user)
-
-        return profile
+            return profile
 
     def retrieve(self, request, *args, **kwargs):
-        # Отримуємо профіль, автоматично створюючи його, якщо він відсутній
+        # Отримуємо профіль
         profile = self.get_object()
 
         # Отримуємо користувача через профіль
         user = profile.user
 
         # Отримуємо пости, пов'язані з користувачем
+        posts = Post.objects.filter(author=user)
+
+        # Серіалізуємо дані профілю та постів
+        profile_data = self.get_serializer(profile).data
+        posts_data = PostSerializer(posts, many=True).data
+
+        return Response(
+            {
+                "profile": profile_data,
+                "posts": posts_data,
+            }
+        )
+
+    def list(self, request, *args, **kwargs):
+        # Повертаємо лише профіль поточного користувача
+        user = request.user
+        profile, created = Profile.objects.get_or_create(user=user)
+
+        # Отримуємо пости поточного користувача
         posts = Post.objects.filter(author=user)
 
         # Серіалізуємо дані профілю та постів

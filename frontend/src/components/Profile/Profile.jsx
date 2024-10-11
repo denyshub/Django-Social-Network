@@ -29,7 +29,7 @@ const Profile = () => {
     const user_id = localStorage.getItem('user_id');
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/profiles/${user_id}/`, { // Використовуємо user_id для запиту
+      const response = await fetch(`http://localhost:8000/api/v1/profiles/`, { // Використовуємо user_id для запиту
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -42,6 +42,7 @@ const Profile = () => {
       }
 
       const data = await response.json();
+      console.log(data)
       setProfile(data);
       setPosts(data.posts || []);
 
@@ -265,7 +266,7 @@ const Profile = () => {
           <ul className="profile-posts">
             {posts.map((post) => (
               <li key={post.id} className="post-list-item">
-                {post.image && <img src={post.image} className="post-list-img" alt={post.text} />}
+                 {post.image && <img src={post.image} alt="Post" className="post-image" />}
                 <p>{post.text}</p>
                 <p><strong>Location:</strong> {post.location}</p>
                 <p><strong>Tags:</strong> {post.tags.join(', ')}</p>

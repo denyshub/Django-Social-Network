@@ -39,8 +39,8 @@ class ChatViewSet(viewsets.ModelViewSet):
         # Формуємо заголовок чату
         title = ", ".join(participant_names)  # Якщо кілька учасників
 
-        # Зберегти чат з заголовком
-        serializer.save(participants=participants, title=title)
+        # Зберігаємо чат з учасниками
+        serializer.save(participants=participant_users, title=title)
 
     def update(self, request, *args, **kwargs):
         chat = self.get_object()
@@ -60,6 +60,31 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         self.perform_destroy(chat)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Отримати чат лише якщо користувач є його учасником"""
+        chat = self.get_object()
+
+        # Перевірка, чи є користувач учасником цього чату
+        if not chat.participants.filter(id=request.user.id).exists():
+            return Response(
+                {"detail": "You cannot view this chat."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        return super().retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """Отримати список чатів, де користувач є учасником"""
+        queryset = self.queryset.filter(participants=request.user)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class MessageViewSet(viewsets.ModelViewSet):

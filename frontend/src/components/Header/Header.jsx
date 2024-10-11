@@ -15,8 +15,8 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    const username = localStorage.getItem('username');
-    navigate(`/profile/${username}`); // Перехід на сторінку профілю
+    const user_id = localStorage.getItem('user_id');
+    navigate(`/profile/${user_id}`); // Перехід на сторінку профілю
     setIsDropdownOpen(false); // Закрити випадаюче меню
   };
 

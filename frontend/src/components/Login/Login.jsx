@@ -37,16 +37,14 @@ const Login = () => {
       });
 
       // Перевіряємо чи є відповідь на профіль
-      if (userResponse.data && userResponse.data.length > 0) {
-        // Зберігаємо ID користувача в localStorage
+     
         localStorage.setItem('user_id', userResponse.data[0].id); 
         console.log('User ID:', userResponse.data[0].id);
 
         // Після успішного логіну перенаправляємо на головну сторінку
         navigate('/');
-      } else {
-        throw new Error('Profile not found');
-      }
+      
+    
       
     } catch (err) {
       // У випадку помилки відображаємо повідомлення

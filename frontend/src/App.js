@@ -17,7 +17,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Posts />} />
         <Route path="/chats" element={<ChatList />} />
-        <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/profile/:user_id" element={<Profile />} />
         <Route path="/chats/:id" element={<ChatDetail />} /> {/* Додано шлях для деталей чату */}
       </Routes>
     </Router>
