@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import viewsets, status
@@ -19,7 +20,10 @@ class ChatViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Отримати учасників з даних запиту
         participants = self.request.data.get("participants", [])
-        participants.append(self.request.user.id)
+
+        # Додаємо поточного користувача до списку учасників, якщо його там немає
+        if self.request.user.id not in participants:
+            participants.append(self.request.user.id)
 
         # Перевірка, чи є принаймні двоє учасників
         if len(participants) < 2:
@@ -27,8 +31,16 @@ class ChatViewSet(viewsets.ModelViewSet):
                 {"detail": "A chat must have at least two participants."}
             )
 
-        # Якщо перевірка пройдена, зберегти чат
-        serializer.save(author=self.request.user, participants=participants)
+        # Отримати імена учасників
+        User = get_user_model()
+        participant_users = User.objects.filter(id__in=participants)
+        participant_names = [user.username for user in participant_users]
+
+        # Формуємо заголовок чату
+        title = ", ".join(participant_names)  # Якщо кілька учасників
+
+        # Зберегти чат з заголовком
+        serializer.save(participants=participants, title=title)
 
     def update(self, request, *args, **kwargs):
         chat = self.get_object()
@@ -41,7 +53,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         chat = self.get_object()
-        if request.user not in chat.participants:
+        if not chat.participants.filter(id=request.user.id).exists():
             return Response(
                 {"detail": "You cannot delete this chat."},
                 status=status.HTTP_403_FORBIDDEN,

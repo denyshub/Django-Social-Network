@@ -44,10 +44,11 @@ const Header = () => {
       <div className="container">
         <nav className="navbar">
           <div className="logo">
-            <a href="/">MyApp</a>
+            <a href="/">Petgram</a>
           </div>
           <ul className="nav-list">
             <li><a href="/">Posts</a></li>
+            <li><a href="/chats">Chats</a></li>
             {isLoggedIn && <li><a href="#" onClick={handleProfileClick}>Profile</a></li>}
           </ul>
           <div className="dropdown">

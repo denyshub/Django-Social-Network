@@ -3,6 +3,7 @@ from django.db import models
 
 
 class Chat(models.Model):
+    title = models.CharField(max_length=100, blank=True)
     participants = models.ManyToManyField(get_user_model(), related_name="chats")
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
@@ -23,16 +24,20 @@ class Message(models.Model):
         get_user_model(), related_name="messages_sent", on_delete=models.CASCADE
     )
     recipient = models.ForeignKey(
-        get_user_model(), related_name="messages_received", on_delete=models.CASCADE, null=True
+        get_user_model(),
+        related_name="messages_received",
+        on_delete=models.CASCADE,
+        null=True,
     )
     text = models.CharField(max_length=1500)
+    is_edited = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     time_create = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Повідомлення"
         verbose_name_plural = "Повідомлення"
-        ordering = ["-time_create"]
+        ordering = ["time_create"]
 
     def __str__(self):
         return (

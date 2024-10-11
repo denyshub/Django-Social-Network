@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom';
 import './Profile.css';
 
 const Profile = () => {
-  const { username } = useParams();
+  const { user_id } = useParams(); // Використовуємо user_id з URL
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isOwner, setIsOwner] = useState(false); // Новий стан для перевірки власника профілю
+  const [isOwner, setIsOwner] = useState(false); 
   const [formData, setFormData] = useState({
     bio: '',
     location: '',
@@ -28,14 +28,8 @@ const Profile = () => {
     const accessToken = localStorage.getItem('access_token');
     const user_id = localStorage.getItem('user_id');
 
-    if (!user_id) {
-      console.error('User ID is not available in localStorage');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/profiles/${user_id}/`, {
+      const response = await fetch(`http://localhost:8000/api/v1/profiles/${user_id}/`, { // Використовуємо user_id для запиту
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -51,8 +45,9 @@ const Profile = () => {
       setProfile(data);
       setPosts(data.posts || []);
 
-      // Перевірка, чи поточний користувач є власником профілю
-      setIsOwner(data.profile.user_id === parseInt(user_id, 10)); 
+      // Перевірка чи користувач є власником профілю
+      const currentUserId = localStorage.getItem('user_id'); // Зберігаємо user_id у localStorage
+      setIsOwner(user_id === currentUserId); 
 
       setFormData({
         bio: data.profile?.bio || '',
@@ -69,7 +64,7 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user_id]); // Оновлюємо запит при зміні user_id
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -135,7 +130,7 @@ const Profile = () => {
     const accessToken = localStorage.getItem('access_token');
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/profiles/${profile.profile.id}/`, {
+      const response = await fetch(`http://localhost:8000/api/v1/profiles/${user_id}/`, { // Використовуємо user_id для PATCH запиту
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -169,6 +164,7 @@ const Profile = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+
   return (
     <div className="profile">
       {profile && profile.profile ? (
@@ -180,7 +176,7 @@ const Profile = () => {
             )}
             <p><strong>Name:</strong> {profile.profile.name}</p>
             <p><strong>Email:</strong> {profile.profile.email}</p>
-            {isEditing && isOwner ? (  // Дозволяємо редагування лише власнику
+            {isEditing && isOwner ? (
               <form onSubmit={handleSubmit}>
                 <textarea
                   name="bio"
@@ -217,12 +213,12 @@ const Profile = () => {
                 <p><strong>Location:</strong> {profile.profile.location}</p>
                 <p><strong>Website:</strong> {profile.profile.website ? <a href={profile.profile.website} target="_blank" rel="noopener noreferrer">{profile.profile.website}</a> : 'N/A'}</p>
                 <p><strong>Date of Birth:</strong> {profile.profile.date_of_birth || 'N/A'}</p>
-                {isOwner && <button onClick={handleEditToggle}>Edit Profile</button>}  {/* Кнопка редагування лише для власника */}
+                {isOwner && <button onClick={handleEditToggle}>Edit Profile</button>}  
               </>
             )}
           </div>
 
-          {isOwner && ( // Дозволяємо створення постів лише власнику
+          {isOwner && (
             <>
               <h3>Create Post</h3>
               <form onSubmit={handlePostSubmit}>
@@ -251,27 +247,35 @@ const Profile = () => {
                   onChange={handlePostChange}
                   placeholder="Tags (comma-separated)"
                 />
-                <button className='profile-button' type="submit">Create Post</button>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="is_published"
+                    checked={newPost.is_published}
+                    onChange={(e) => setNewPost((prev) => ({ ...prev, is_published: e.target.checked }))}
+                  />
+                  Publish
+                </label>
+                <button type="submit">Post</button>
               </form>
             </>
           )}
 
           <h3>Posts</h3>
-          <ul className="post-list">
-            {posts.length > 0 ? (
-              posts.map(post => (
-                <li key={post.id}>
-                  <p>{post.text}</p>
-                  {post.image && <img src={post.image} alt="Post" />}
-                </li>
-              ))
-            ) : (
-              <li>No posts yet.</li>
-            )}
+          <ul className="profile-posts">
+            {posts.map((post) => (
+              <li key={post.id} className="post-list-item">
+                {post.image && <img src={post.image} className="post-list-img" alt={post.text} />}
+                <p>{post.text}</p>
+                <p><strong>Location:</strong> {post.location}</p>
+                <p><strong>Tags:</strong> {post.tags.join(', ')}</p>
+                <p><strong>Published:</strong> {post.is_published ? 'Yes' : 'No'}</p>
+              </li>
+            ))}
           </ul>
         </>
       ) : (
-        <div>No profile found.</div>
+        <p>Profile not found.</p>
       )}
     </div>
   );
