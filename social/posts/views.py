@@ -1,13 +1,11 @@
 import django_filters
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
+from .mixins import AuthorStaffPermissionMixin
 from .models import Post, Tag, Comment, Like
 from .serializers import (
     PostSerializer,
@@ -23,24 +21,22 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(AuthorStaffPermissionMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CommentsSerializer
     queryset = Comment.objects.all()
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop("partial", False)
         comment = self.get_object()
 
-        if request.user != comment.author:
-            raise PermissionDenied("You cannot edit this comment.")
+        self.check_author(request.user, comment)
 
         # Оновлення поля is_edited
         comment.is_edited = True
         comment.save()
 
         # Виклик базового методу update
-        serializer = self.get_serializer(comment, data=request.data, partial=partial)
+        serializer = self.get_serializer(comment, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -57,22 +53,22 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class LikesViewSet(viewsets.ModelViewSet):
+class LikesViewSet(AuthorStaffPermissionMixin, viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikesSerializer
+    permission_classes = [IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
         like = self.get_object()
 
         # Перевірка, чи є користувач автором коментаря
-        if request.user != like.author:
-            raise PermissionDenied("You cannot delete this like.")
+        self.check_author(request.user, like)
 
         self.perform_destroy(like)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(AuthorStaffPermissionMixin, viewsets.ModelViewSet):
     search = django_filters.CharFilter(field_name="text", lookup_expr="icontains")
     tag = django_filters.CharFilter(field_name="tags__name", lookup_expr="iexact")
     serializer_class = PostSerializer
@@ -89,19 +85,15 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         post = self.get_object()
-        if request.user != post.author:
-            return Response(
-                {"detail": "You cannot change this post."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        self.check_author(request.user, post)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()
 
         # Перевірка, чи є користувач автором коментаря
-        if request.user != post.author and not request.user.is_staff:
-            raise PermissionDenied("You cannot delete this post.")
+        self.check_author(request.user, post)
+        self.check_is_staff(request.user)
 
         self.perform_destroy(post)
         return Response(status=status.HTTP_204_NO_CONTENT)

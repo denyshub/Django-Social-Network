@@ -18,9 +18,9 @@ class Post(models.Model):
             MaxLengthValidator(5000),  # Максимальна довжина 5000 символів
         ],
     )
-    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True)
-    time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
-    is_published = models.BooleanField(default=True)
+    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    time_create = models.DateTimeField("Дата створення", auto_now_add=True)
+    is_published = models.BooleanField("Статус", default=True)
     location = models.CharField(
         max_length=255,
         null=True,
@@ -56,7 +56,7 @@ class Tag(models.Model):
 class Comment(models.Model):
     author = models.ForeignKey(
         get_user_model(),
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="comments",
         null=True,
         default=None,
@@ -76,7 +76,7 @@ class Comment(models.Model):
 class Like(models.Model):
     author = models.ForeignKey(
         get_user_model(),
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="likes",
         null=True,
         default=None,

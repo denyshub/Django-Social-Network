@@ -11,7 +11,18 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = "__all__"
+        fields = [
+            "id",
+            "chat",
+            "author",
+            "author_name",
+            "recipient",
+            "text",
+            "is_edited",
+            "is_published",
+            "time_create",
+        ]
+        read_only_fields = ["author", "time_create", "is_edited", "author_name"]
 
 
 class ChatSerializer(serializers.ModelSerializer):

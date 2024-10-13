@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Chat(models.Model):
-    title = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=100)
     participants = models.ManyToManyField(get_user_model(), related_name="chats")
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(
@@ -38,6 +38,13 @@ class Message(models.Model):
         verbose_name = "Повідомлення"
         verbose_name_plural = "Повідомлення"
         ordering = ["time_create"]
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:  # Якщо об'єкт вже існує
+            original_chat = Message.objects.get(pk=self.pk).chat
+            if original_chat != self.chat:
+                raise ValueError("You cannot change the chat of this message.")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return (

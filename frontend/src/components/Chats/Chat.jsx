@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import './Chats.css'; // Import your CSS for styling
+import { format } from 'date-fns';
 
 const ChatDetail = () => {
   const { id } = useParams(); // Retrieve the chat ID from the URL
@@ -94,7 +95,7 @@ const handleSendMessage = async () => {
             {chat.messages.length > 0 ? (
               chat.messages.map((msg) => (
                 <div key={msg.id}>
-                  <p><strong>{msg.author_name}: </strong>{msg.text}</p>
+                  <p><strong>{msg.author_name}: </strong>{msg.text} {format(new Date(msg.time_create), 'HH:mm')}</p>
                 </div>
               ))
             ) : (

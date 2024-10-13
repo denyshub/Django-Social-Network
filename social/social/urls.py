@@ -2,11 +2,11 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 from chats.views import ChatViewSet, MessageViewSet
-from posts.serializers import LikesSerializer
 from posts.views import *
 from users.views import UserRegistrationView, ProfileViewSet
 
