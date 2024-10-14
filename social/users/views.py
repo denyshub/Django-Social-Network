@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from rest_framework import status, viewsets, generics
@@ -64,7 +65,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
             }
         )
 
-    def list(self, request, *args, **kwargs):
+    @action(detail=False, methods=['get'], url_path='me')
+    def get_my_profile(self, request, *args, **kwargs):
         # Повертаємо лише профіль поточного користувача
         user = request.user
         profile, created = Profile.objects.get_or_create(user=user)

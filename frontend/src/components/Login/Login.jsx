@@ -9,49 +9,52 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      // Відправляємо запит на отримання токенів
-      const response = await axios.post('http://localhost:8000/api/v1/token/', {
-        username,
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+        // Send a request to get the tokens
+        const response = await axios.post('http://localhost:8000/api/v1/token/', {
+            username,
+            password,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-      // Зберігаємо токени в localStorage
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
-      localStorage.setItem('username', username);
+        // Store tokens in localStorage
+        localStorage.setItem('access_token', response.data.access);
+        localStorage.setItem('refresh_token', response.data.refresh);
+        localStorage.setItem('username', username);
 
-      // Запит на отримання профілю користувача
-      const userResponse = await axios.get('http://localhost:8000/api/v1/profiles/', {
-        headers: {
-          Authorization: `Bearer ${response.data.access}`,
-        },
-      });
+        // Request to get the user profile
+        const userResponse = await axios.get('http://localhost:8000/api/v1/profiles/', {
+            headers: {
+                Authorization: `Bearer ${response.data.access}`,
+            },
+        });
 
-      // Перевіряємо чи є відповідь на профіль
-     
-        localStorage.setItem('user_id', userResponse.data[0].id); 
-        console.log('User ID:', userResponse.data[0].id);
-
-        // Після успішного логіну перенаправляємо на головну сторінку
-        navigate('/');
-      
-    
-      
+        // Find the profile matching the logged-in user
+        const userProfile = userResponse.data.find(profile => profile.name === username);
+        console.log(username)
+        if (userProfile) {
+            localStorage.setItem('user_id', userProfile.id); 
+            console.log('User ID:', userProfile.id);
+            // After successful login, redirect to the home page
+            navigate('/');
+        } else {
+            setError('Profile not found');
+        }
+        
     } catch (err) {
-      // У випадку помилки відображаємо повідомлення
-      setError('Invalid credentials or profile not found');
-      console.error(err);
+        // In case of an error, display the message
+        setError('Invalid credentials or profile not found');
+        console.error(err);
     }
-  };
+};
+
 
   return (
     <div className="login">

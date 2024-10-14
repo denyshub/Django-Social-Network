@@ -16,7 +16,7 @@ const Header = () => {
 
   const handleProfileClick = () => {
     const user_id = localStorage.getItem('user_id');
-    navigate(`/profile/${user_id}`); // Перехід на сторінку профілю
+    navigate(`/profile/` + user_id + '/'); // Перехід на сторінку профілю
     setIsDropdownOpen(false); // Закрити випадаюче меню
   };
 
@@ -49,7 +49,7 @@ const Header = () => {
           <ul className="nav-list">
             <li><a href="/">Posts</a></li>
             <li><a href="/chats">Chats</a></li>
-            {isLoggedIn && <li><a href="#" onClick={handleProfileClick}>Profile</a></li>}
+            {isLoggedIn && <li><a  onClick={handleProfileClick}>Profile</a></li>}
           </ul>
           <div className="dropdown">
             <button className="dropdown-button" onClick={toggleDropdown}>
